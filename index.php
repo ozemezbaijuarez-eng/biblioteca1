@@ -1,18 +1,32 @@
 <?php 
-// Cambia estos datos con los que te proporcione AwardSpace en tu "Database Manager" 
-$host = "pdbXX.awardspace.net"; // Reemplaza XX por el número de tu servidor 
-$usuario = "tu_usuario_bd"; 
-$password = "tu_password_bd"; 
-$base_datos = "tu_nombre_bd"; 
+$hostServidor = "fdb1029.awardspace.net"; 
+$usuarioBaseDatos = "4794850_pruebadb"; 
+$passwordBaseDatos = "eviltux00"; 
+$nombreBaseDatos = "4794850_pruebadb"; 
 
-$conexion = new mysqli($host, $usuario, $password, $base_datos); 
+$conexion = new mysqli(
+    $hostServidor, 
+    $usuarioBaseDatos, 
+    $passwordBaseDatos, 
+    $nombreBaseDatos
+); 
 
 if ($conexion->connect_error) { 
     die("Error de conexión: " . $conexion->connect_error); 
 } 
 
-// Obtener los libros existentes 
-$resultado = $conexion->query("SELECT * FROM libros ORDER BY id DESC"); 
+/**
+ * Obtiene la lista completa de libros ordenados por ID de forma descendente.
+ * 
+ * @param mysqli $conexion Instancia de la conexión a la base de datos.
+ * @return mysqli_result|false Conjunto de resultados de la consulta o false si falla.
+ */
+function obtenerInventarioLibros($conexion) {
+    return $conexion->query("SELECT * FROM libros ORDER BY id DESC");
+}
+
+// Obtener los libros existentes usando la función documentada
+$resultadoLibros = obtenerInventarioLibros($conexion); 
 ?>
 <!DOCTYPE html> 
 <html lang="es"> 
@@ -26,6 +40,7 @@ $resultado = $conexion->query("SELECT * FROM libros ORDER BY id DESC");
     <header> 
         <h1>Sistema de Control de Biblioteca</h1> 
     </header> 
+    
     <main class="container"> 
         <!-- Formulario para agregar libros --> 
         <section class="card"> 
@@ -61,16 +76,16 @@ $resultado = $conexion->query("SELECT * FROM libros ORDER BY id DESC");
                     </tr> 
                 </thead> 
                 <tbody> 
-                    <?php if ($resultado && $resultado->num_rows > 0): ?> 
-                        <?php while($fila = $resultado->fetch_assoc()): ?> 
+                    <?php if ($resultadoLibros && $resultadoLibros->num_rows > 0): ?> 
+                        <?php while ($filaLibro = $resultadoLibros->fetch_assoc()): ?> 
                             <tr> 
-                                <td><?php echo $fila['id']; ?></td> 
-                                <td><strong><?php echo htmlspecialchars($fila['titulo']); ?></strong></td> 
-                                <td><?php echo htmlspecialchars($fila['autor']); ?></td> 
-                                <td><?php echo htmlspecialchars($fila['isbn']); ?></td> 
+                                <td><?php echo $filaLibro['id']; ?></td> 
+                                <td><strong><?php echo htmlspecialchars($filaLibro['titulo']); ?></strong></td> 
+                                <td><?php echo htmlspecialchars($filaLibro['autor']); ?></td> 
+                                <td><?php echo htmlspecialchars($filaLibro['isbn']); ?></td> 
                                 <td> 
-                                    <span class="badge <?php echo $fila['disponible'] ? 'dispo' : 'prestado'; ?>"> 
-                                        <?php echo $fila['disponible'] ? 'Disponible' : 'Prestado'; ?> 
+                                    <span class="badge <?php echo $filaLibro['disponible'] ? 'dispo' : 'prestado'; ?>"> 
+                                        <?php echo $filaLibro['disponible'] ? 'Disponible' : 'Prestado'; ?> 
                                     </span> 
                                 </td> 
                             </tr> 
@@ -84,7 +99,10 @@ $resultado = $conexion->query("SELECT * FROM libros ORDER BY id DESC");
             </table> 
         </section> 
     </main> 
+    
     <script src="script.js"></script> 
 </body> 
 </html> 
-<?php $conexion->close(); ?>
+<?php 
+$conexion->close(); 
+?>
